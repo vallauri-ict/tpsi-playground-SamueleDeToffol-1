@@ -2,6 +2,7 @@ import * as _http from "http";
 import * as _url from "url";
 import * as _fs from "fs";
 import * as _mime from "mime";
+import * as _querystring from "query-string";
 
 let HEADERS = require("./headers.json");
 let paginaErrore : string;
@@ -32,30 +33,53 @@ class Dispatcher{
             stessa cosa di sopra
         }*/
     }  
-
     dispatch(req,res){
-        let metodo = req.method;
-        let url = _url.parse(req.url, true); //parsing della url ricevuta, sempre true così parsifica sempre anche i parametri
-
-        let risorsa = url.pathname;
-        let parametri = url.query;
-
-        console.log(`${this.prompt} ${metodo} : ${risorsa} ${JSON.stringify(parametri)}`);
-
-        if(risorsa.startsWith("/api/")){
-            if(risorsa in this.listeners[metodo]){
-                let _callback = this.listeners[metodo][risorsa];
-                _callback(req,res);    //lancio la callback
-            }
-            else{
-                res.writeHead(404, HEADERS.text);
-                res.write("Servizio non trovato");  //il client si aspetta un json, in caso di errore al posto del json gli passiamo una stringa e non paginaErrore
-                res.end();
-            }
+        let metodo = req.method.toUpperCase();
+        if(metodo = "GET"){
+            innerDispatch(req,res);
         }
         else{
-            staticListener(req,res,risorsa);
+            let parametriBody = "";
+            req.on("data",function(data){
+                parametriBody += data;
+            });
+            let parametriJson = {};
+            req.on("end", function(){
+                try{
+                    parametriJson = JSON.parse(parametriBody); //se i param sono in JSON il try va a buon fine se no passo nel catch
+                }
+                catch(error){
+                    parametriJson = _querystring.parse(parametriBody);
+                }
+            });
         }
+    }
+}
+
+function innerDispatch(req,res){
+    let metodo = req.method;
+    let url = _url.parse(req.url, true); //parsing della url ricevuta, sempre true così parsifica sempre anche i parametri
+
+    let risorsa = url.pathname;
+    let parametri = url.query;
+
+    console.log(`${this.prompt} ${metodo} : ${risorsa} ${JSON.stringify(parametri)}`);
+
+    req["GET"] = parametri;
+
+    if(risorsa.startsWith("/api/")){
+        if(risorsa in this.listeners[metodo]){
+            let _callback = this.listeners[metodo][risorsa];
+            _callback(req,res);    //lancio la callback
+        }
+        else{
+            res.writeHead(404, HEADERS.text);
+            res.write("Servizio non trovato");  //il client si aspetta un json, in caso di errore al posto del json gli passiamo una stringa e non paginaErrore
+            res.end();
+        }
+    }
+    else{
+        staticListener(req,res,risorsa);
     }
 }
 
