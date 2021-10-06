@@ -1,19 +1,15 @@
-$(document).ready(function () {
+"use strict"
+$(document).ready(function() {
+    let _lstNazioni = $("#lstNazioni");
+    let _tabStudenti = $("#tabStudenti");
+    let _divDettagli = $("#divDettagli");
 
-    $("#btnInvia").on("click", function () {
-        let request = inviaRichiesta("get", "/api/servizio1", { "nome": "pippo" }
-        );
-        request.fail(errore);
-        request.done(function (data) {
-            alert(JSON.stringify(data));
-        });
-    });
-    $("#btnInvia2").on("click", function () {
-        let request = inviaRichiesta("get", "/api/servizio2", { "nome": "pippo" }
-        );
-        request.fail(errore);
-        request.done(function (data) {
-            alert(JSON.stringify(data));
-        });
-    });
-});
+    _divDettagli.hide()
+
+    let requestNazioni = inviaRichiesta("GET", "/api/nazioni");
+    requestNazioni.fail(errore);
+    requestNazioni.done(function (data){
+        console.log(data);
+    })
+    
+})
