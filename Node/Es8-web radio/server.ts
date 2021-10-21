@@ -1,27 +1,17 @@
 import * as http from "http";
 import * as fs from "fs";
+import { Dispatcher } from "./dispatcher";
 import HEADERS from "./headers.json";
 import RADIOS from "./radios.json";
 import STATES from "./states.json";
 
-const dispatcher = require("./dispatcher.ts");
-
 const PORT: number = 1337;
 
-let init = () => {
-  STATES.map((region) => {
-    let aus = RADIOS.filter((radio) => radio.state == region.value);
-    region.stationcount = aus.length.toString();
-  });
-  // fs.writeFile("./states.json", JSON.stringify(STATES), () =>
-  //   console.log("finish")
-  // );
-};
+let dispatcher: Dispatcher = new Dispatcher();
 
 let server = http.createServer((req, res) => {
   dispatcher.dispatch(req, res);
 });
-init();
 server.listen(PORT);
 console.log(`Server in ascolto sulla porta: ${PORT}`);
 
@@ -48,7 +38,7 @@ dispatcher.addListener("POST", "/api/updateLike", (req, res) => {
   for (let radio of RADIOS) {
     if (radio.id === id) {
       radio.votes = (parseInt(radio.votes) + 1).toString();
-      aus = radio.votes;
+      aus = radio;
       break;
     }
   }
