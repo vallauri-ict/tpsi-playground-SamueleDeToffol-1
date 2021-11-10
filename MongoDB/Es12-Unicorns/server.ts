@@ -323,7 +323,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
     let db = client.db(DB_NAME);
     let collection = db.collection("Unicorns");
     //se il record da aggiornare non esiste con upsert viene creato automaticamente
-    collection.updateOne({ "name": "Pilot"}, {$inc: { "vampires": 1 } },{"upsert":true}, 
+    collection.updateOne({ "name": "Pluto" }, { $inc: { "vampires": 1 } }, { "upsert": true },
       (err, data) => {
         if (!err) {
           console.log("Query 16", data);
@@ -343,10 +343,113 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME);
     let collection = db.collection("Unicorns");
-    collection.updateOne({ "name": "Aurora"}, {$addToSet:{"loves":"carrot"}, $inc:{"weight":10}},
+    collection.updateOne({ "name": "Aurora" }, { $addToSet: { "loves": "carrot" }, $inc: { "weight": 10 } },
       (err, data) => {
         if (!err) {
           console.log("Query 17", data);
+        } else {
+          console.log("Errore esecuzione query: " + err.message);
+        }
+        client.close();
+      }
+    )
+  } else {
+    console.log("Errore connessione al db: " + err.message);
+  }
+});
+
+//query 18
+mongoClient.connect(CONNECTION_STRING, (err, client) => {
+  if (!err) {
+    let db = client.db(DB_NAME);
+    let collection = db.collection("Unicorns");
+    //se il record da aggiornare non esiste con upsert viene creato automaticamente
+    collection.updateOne({ "name": "Minnie" }, { $inc: { "vampires": 1 } }, { "upsert": true },
+      (err, data) => {
+        if (!err) {
+          console.log("Query 18", data);
+        } else {
+          console.log("Errore esecuzione query: " + err.message);
+        }
+        client.close();
+      }
+    )
+  } else {
+    console.log("Errore connessione al db: " + err.message);
+  }
+});
+
+//query 19
+mongoClient.connect(CONNECTION_STRING, (err, client) => {
+  if (!err) {
+    let db = client.db(DB_NAME);
+    let collection = db.collection("Unicorns");
+    collection.updateMany({ "vaccinated": { $exists: true } }, { $set: { "vaccinated": true } },
+      (err, data) => {
+        if (!err) {
+          console.log("Query 19", data);
+        } else {
+          console.log("Errore esecuzione query: " + err.message);
+        }
+        client.close();
+      }
+    )
+  } else {
+    console.log("Errore connessione al db: " + err.message);
+  }
+});
+
+//query 20
+mongoClient.connect(CONNECTION_STRING, (err, client) => {
+  if (!err) {
+    let db = client.db(DB_NAME);
+    let collection = db.collection("Unicorns");
+    collection.deleteMany({ "loves": { $all: ["grape", "carrot"] } },
+      (err, data) => {
+        if (!err) {
+          console.log("Query 20", data);
+        } else {
+          console.log("Errore esecuzione query: " + err.message);
+        }
+        client.close();
+      }
+    )
+  } else {
+    console.log("Errore connessione al db: " + err.message);
+  }
+});
+
+
+//query 21
+mongoClient.connect(CONNECTION_STRING, (err, client) => {
+  if (!err) {
+    let db = client.db(DB_NAME);
+    let collection = db.collection("Unicorns");
+    collection.find({ "gender": "f" }).sort({ "vampires": -1 }).limit(1).project({ "name": 1, "vampires": 1, "_id": 0 }).toArray(
+      (err, data) => {
+        if (!err) {
+          console.log("Query 21", data);
+        } else {
+          console.log("Errore esecuzione query: " + err.message);
+        }
+        client.close();
+      }
+    )
+  } else {
+    console.log("Errore connessione al db: " + err.message);
+  }
+});
+
+//query 22
+mongoClient.connect(CONNECTION_STRING, (err, client) => {
+  if (!err) {
+    let db = client.db(DB_NAME);
+    let collection = db.collection("Unicorns");
+    //cancella tutti i campi del record trovato tranne l'id
+    collection.replaceOne({ "name": "Pluto" }, { "name": "Pluto", "residenza": "Fossano", "loves": ["apple", "grape"]},
+      (err, data) => {
+        if (!err) {
+          console.log("Query 22", data);
         } else {
           console.log("Errore esecuzione query: " + err.message);
         }
