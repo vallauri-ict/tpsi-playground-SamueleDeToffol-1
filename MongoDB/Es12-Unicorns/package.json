@@ -22,5 +22,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Samuele De Toffol",
-  "license": "ISC"
+  "license": "ISC",
+  "prettier":{
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true
+  }
 }
