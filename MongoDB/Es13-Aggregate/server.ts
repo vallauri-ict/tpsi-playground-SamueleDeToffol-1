@@ -286,7 +286,6 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
   }
 });
 
-
 //9
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
@@ -302,6 +301,31 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
       .toArray()
       .then((data) => {
         console.log('Query 9', data);
+      })
+      .catch((err) => {
+        console.log('Errore esecuzione query: ' + err.message);
+      })
+      .finally(() => {
+        client.close();
+      });
+  } else {
+    console.log('Errore connessione al db: ' + err.message);
+  }
+});
+
+//10
+mongoClient.connect(CONNECTION_STRING, (err, client) => {
+  if (!err) {
+    let db = client.db(DB_NAME);
+    //amount se usata a destra dei : si mette $ se invece li uso come chiave non ci vuole
+    db.collection('Students')
+      .find({
+        $expr:{$gte:[{$year:"$nato"},2000]}
+      }
+      )
+      .toArray()
+      .then((data) => {
+        console.log('Query 10', data);
       })
       .catch((err) => {
         console.log('Errore esecuzione query: ' + err.message);
