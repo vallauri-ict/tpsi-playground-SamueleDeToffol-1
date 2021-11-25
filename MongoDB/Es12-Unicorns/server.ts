@@ -1,14 +1,14 @@
 import * as mongodb from 'mongodb'
 
 const mongoClient = mongodb.MongoClient
-const CONNECTION_STRING = 'mongodb://127.0.0.1:27017'
+const CONNECTION_STRING = 'mongodb+srv://admin:admin@cluster0.8rbom.mongodb.net/5B?retryWrites=true&w=majority'
 const DB_NAME = '5B'
 
 //query 1
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection
       .find({ weight: { $lte: 800, $gte: 700 } })
       .toArray((err, data) => {
@@ -28,7 +28,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection
       .find({
         $and: [{ gender: 'm' }, { loves: 'grape' }, { vampires: { $gt: 60 } }],
@@ -50,7 +50,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection
       .find({
         $and: [
@@ -76,7 +76,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection
       .find({ $or: [{ gender: 'f' }, { weight: { $lte: 700 } }] })
       .toArray((err, data) => {
@@ -96,7 +96,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection
       .find({
         $and: [
@@ -121,7 +121,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection
       .find({ loves: { $all: ['watermelon', 'grape'] } })
       .toArray((err, data) => {
@@ -141,7 +141,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection
       .find({ $or: [{ hair: 'brown' }, { hair: 'grey' }] })
       .toArray((err, data) => {
@@ -161,7 +161,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection
       .find({ hair: { $in: ['grey', 'brown'] } })
       .toArray((err, data) => {
@@ -181,7 +181,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection
       .find({
         $and: [{ vaccinated: { $exists: true } }, { vaccinated: false }],
@@ -203,7 +203,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     let regex = new RegExp('^A', 'i')
     collection
       .find({ $and: [{ name: { $regex: regex } }, { gender: 'f' }] })
@@ -224,7 +224,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection
       .find({ _id: new mongodb.ObjectId('61823940e6afc3f50bdf18b0') })
       .toArray((err, data) => {
@@ -244,7 +244,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection
       .find({ gender: 'm' })
       .project({ name: 1, vampires: 1, _id: 0 })
@@ -268,7 +268,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection.find({ weight: { $gt: 500 } }).count((err, data) => {
       if (!err) {
         console.log('Query 12', data)
@@ -286,7 +286,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection.findOne(
       { name: 'Aurora' },
       { projection: { weight: 1, hair: 1 } },
@@ -308,7 +308,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection.distinct('loves', { gender: 'f' }, (err, data) => {
       if (!err) {
         console.log('Query 14', data)
@@ -326,7 +326,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection.insertOne(
       { name: 'Pippo', gender: 'm', loves: ['apple', 'lemon'] },
       (err, data) => {
@@ -354,7 +354,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     //se il record da aggiornare non esiste con upsert viene creato automaticamente
     collection.updateOne(
       { name: 'Pluto' },
@@ -378,7 +378,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection.updateOne(
       { name: 'Aurora' },
       { $addToSet: { loves: 'carrot' }, $inc: { weight: 10 } },
@@ -400,7 +400,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     //se il record da aggiornare non esiste con upsert viene creato automaticamente
     collection.updateOne(
       { name: 'Minnie' },
@@ -424,7 +424,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection.updateMany(
       { vaccinated: { $exists: true } },
       { $set: { vaccinated: true } },
@@ -446,7 +446,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection.deleteMany(
       { loves: { $all: ['grape', 'carrot'] } },
       (err, data) => {
@@ -467,7 +467,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     collection
       .find({ gender: 'f' })
       .sort({ vampires: -1 })
@@ -490,7 +490,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     //cancella tutti i campi del record trovato tranne l'id
     collection.replaceOne(
       { name: 'Pluto' },
@@ -513,7 +513,7 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
 mongoClient.connect(CONNECTION_STRING, (err, client) => {
   if (!err) {
     let db = client.db(DB_NAME)
-    let collection = db.collection('Unicorns')
+    let collection = db.collection('unicorns')
     let req = collection.find({ weight: { $lte: 800, $gte: 700 } }).toArray()
     req.then((data) => {
       console.log('Query 1B', data)
