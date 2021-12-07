@@ -6,7 +6,7 @@ import * as mongodb from "mongodb";
 
 const mongoClient = mongodb.MongoClient;
 const CONNECTION_STRING =
-  "mongodb+srv://admin:admin@cluster0.8rbom.mongodb.net/5B?retryWrites=true&w=majority";
+  
 const DB_NAME = "5B";
 
 let port: number = 1337;
