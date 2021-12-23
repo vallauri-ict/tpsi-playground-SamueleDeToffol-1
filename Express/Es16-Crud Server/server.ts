@@ -4,6 +4,7 @@ import * as fs from "fs";
 import * as bodyParser from "body-parser";
 import express from "express";
 import * as mongodb from "mongodb";
+import cors from "cors";
 //#endregion
 
 //#region mongoDB
@@ -11,7 +12,7 @@ const mongoClient = mongodb.MongoClient;
 // const CONNECTION_STRING = "mongodb://127.0.0.1:27017";
 const CONNECTION_STRING =
   "mongodb+srv://admin:admin@cluster0.niwz6.mongodb.net/5B?retryWrites=true&w=majority";
-const DB_NAME = "unicorns";
+const DB_NAME = "recipeBook";
 //#endregion
 
 const PORT: number = 1337;
@@ -66,6 +67,22 @@ app.use("/", (req, res, next) => {
     }
   });
 });
+
+// 6. Middleware cors
+const whitelist = ["http://localhost:4200", "http://localhost:1337"];
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (whitelist.indexOf(origin) === -1) {
+      var msg =
+        "The CORS policy for this site does not " +
+        "allow access from the specified Origin.";
+      return callback(new Error(msg), false);
+    } else return callback(null, true);
+  },
+  credentials: true,
+};
+app.use("/", cors(corsOptions));
 
 /*  **************
     elenco delle routes di risposta al client
