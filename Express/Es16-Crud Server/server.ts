@@ -1,139 +1,178 @@
-import express from "express";
-import * as fs from "fs";
+//#region import
 import * as http from "http";
+import * as fs from "fs";
 import * as bodyParser from "body-parser";
+import express from "express";
 import * as mongodb from "mongodb";
+//#endregion
 
+//#region mongoDB
 const mongoClient = mongodb.MongoClient;
+// const CONNECTION_STRING = "mongodb://127.0.0.1:27017";
 const CONNECTION_STRING =
-  "mongodb+srv://admin:admin@cluster0.8rbom.mongodb.net/5B?retryWrites=true&w=majority";
-const DB_NAME = "5B";
+  "mongodb+srv://admin:admin@cluster0.niwz6.mongodb.net/5B?retryWrites=true&w=majority";
+const DB_NAME = "unicorns";
+//#endregion
 
-let port: number = 1337;
-let app = express();
+const PORT: number = 1337;
+const app = express();
 
-let server = http.createServer(app);
+const server = http.createServer(app);
 
-server.listen(port, () => {
-  console.log("Server in ascolto sulla porta " + port);
+server.listen(PORT, () => {
+  console.log(`Server in ascolto sulla porta: ${PORT}`);
   init();
 });
 
 let paginaErrore = "";
 function init() {
   fs.readFile("./static/error.html", (err, data) => {
-    if (!err) {
-      paginaErrore = data.toString();
-    } else {
-      paginaErrore = "<h2>Risorsa non trovata</h2>";
-    }
+    if (!err) paginaErrore = data.toString();
+    else paginaErrore = "<h2>Risorsa non trovata</h2>";
   });
 }
 
-/*********************************************************/
-/********* elenco delle routes di tipo middleware ********/
-/*********************************************************/
+/*  **************
+    //  elenco delle routes middleware
+    ************** */
 
-// 1 log
+//  1. Log
 app.use("/", (req, res, next) => {
-  console.log(" -----> " + req.method + " : " + req.originalUrl);
+  console.log("---> ", req.method + ": " + req.originalUrl);
   next();
 });
 
-// 2 static route, se non trova la risorsa fa in automatico next
-app.use("/", express.static("./static"));
+//  2. Static route
+app.use("/", express.static("./static")); //  next fa in automatico
 
-// 3 route di lettura dei parametri post
+//  3. Route lettura paramentri post
 app.use("/", bodyParser.json());
 app.use("/", bodyParser.urlencoded({ extended: true }));
 
-// 4 log parametri
+//  4. Log dei parametri
 app.use("/", (req, res, next) => {
-  if (Object.keys(req.query).length > 0) {
-    console.log("   Parametri get: ", req.query);
-  }
-  if (Object.keys(req.body).length > 0) {
-    console.log("   Parametri body: ", req.body);
-  }
+  if (Object.keys(req.query).length > 0) console.log("GET --->", req.query);
+  if (Object.keys(req.body).length > 0) console.log("BODY --->", req.body);
   next();
 });
 
-/************************************************************/
-/********* elenco delle routes di risposta al client ********/
-/************************************************************/
-
+//  5. Connessione al DB
 app.use("/", (req, res, next) => {
   mongoClient.connect(CONNECTION_STRING, (err, client) => {
-    if (err) {
-      res.status(503).send("Db connection error");
-    } else {
-      console.log("Connection made");
+    if (err) res.status(503).send("DB connection error");
+    else {
       req["client"] = client;
       next();
     }
   });
 });
 
-// 5 richiesta get
-app.get("/api/risorsa1", (req, res, next) => {
-  let nome = req.query.name;
-  if (nome) {
-    let db = req["client"].db(DB_NAME) as mongodb.Db;
-    let collection = db.collection("unicorns");
-    collection
-      .find({ name: nome })
-      .toArray()
-      .then((data) => res.send(data))
-      .catch((err) => res.status(503).send("Errore nella sintassi della query"))
-      .finally(() => req["client"].close());
-  } else {
-    res.status(400).send("Parametro mancante: unicornName");
-    req["client"].close();
-  }
+/*  **************
+    elenco delle routes di risposta al client
+    ************** */
+
+//  middleware di intercettazione dei parametri
+let currentCollection: string = "";
+let id: string = "";
+
+app.use("/api/:collection/:id?", (req, res, next) => {
+  currentCollection = req.params.collection;
+  id = req.params.id;
+  next();
 });
 
-// 6 richiesta patch
-app.patch("/api/risorsa1", (req, res, next) => {
-  let nome = req.body.nome;
-  let incVampires = req.body.vampires;
-  if (nome && incVampires) {
-    let db = req["client"].db(DB_NAME) as mongodb.Db;
-    let collection = db.collection("unicorns");
-    collection
-      .updateOne({ name: nome }, { $inc: { vampires: incVampires } })
-      .then((data) => res.send(data))
-      .catch((err) => res.status(503).send("Errore nella sintassi della query"))
-      .finally(() => req["client"].close());
-  } else {
-    res.status(400).send("Numero parametri insufficiente");
-    req["client"].close();
-  }
-});
-
-// 7 Query 1
-app.get("/api/risorsa3/:gender/:hair", (req, res, next) => {
-  let genere = req.params.gender;
-  let pelo = req.params.hair;
-  //  if non serve dato che entra nella route solo in caso trovi i parametri
+//  lettura delle collezioni presenti nel db
+app.get("/api/getCollections", (req, res, next) => {
   let db = req["client"].db(DB_NAME) as mongodb.Db;
-  let collection = db.collection("unicorns");
-  collection
-    .find({ $and: [{ gender: genere }, { hair: pelo }] })
+  let collections = db
+    .listCollections()
     .toArray()
     .then((data) => res.send(data))
-    .catch((err) => res.status(503).send("Errore nella sintassi della query"))
+    .catch((err) => res.status(503).send("QUERY: Syntax error"))
     .finally(() => req["client"].close());
 });
 
-/**************************************************************************************/
-/********* Default route(risorsa non trovata) e route di gestione degli errori ********/
-/**************************************************************************************/
+//  listener specifici
 
-app.use("/", (req, res, next) => {
-  res.status(404);
-  if (req.originalUrl.startsWith("/api/")) {
-    res.send("Risorsa non trovata");
+app.get("/api/*", (req, res, next) => {
+  if (currentCollection) {
+    let db = req["client"].db(DB_NAME) as mongodb.Db;
+    let collection = db.collection(currentCollection);
+    if (!id) {
+      collection
+        .find(req["query"])
+        .toArray()
+        .then((data) => res.send(data))
+        .catch((err) => res.status(503).send("QUERY: Syntax error"))
+        .finally(() => req["client"].close());
+    } else {
+      const oId = new mongodb.ObjectId(id);
+      collection
+        .findOne({ _id: oId })
+        .then((data) => res.send(data))
+        .catch((err) => res.status(503).send("QUERY: Syntax error"))
+        .finally(() => req["client"].close());
+    }
   } else {
-    res.send(paginaErrore);
+    res.status(400).send("Parametro mancante: collection");
+    req["client"].close();
   }
+});
+
+app.post("/api/*", (req, res, next) => {
+  if (currentCollection) {
+    let db = req["client"].db(DB_NAME) as mongodb.Db;
+    let collection = db.collection(currentCollection);
+    collection
+      .insertOne(req["body"])
+      .then((data) => res.send(data))
+      .catch((err) => res.status(503).send("QUERY: Syntax error"))
+      .finally(() => req["client"].close());
+  }
+});
+
+app.delete("/api/*", (req, res, next) => {
+  if (currentCollection) {
+    let db = req["client"].db(DB_NAME) as mongodb.Db;
+    let collection = db.collection(currentCollection);
+    const oId = new mongodb.ObjectId(id);
+    collection
+      .deleteOne({ _id: oId })
+      .then((data) => res.send(data))
+      .catch((err) => res.status(503).send("QUERY: Syntax error"))
+      .finally(() => req["client"].close());
+  }
+});
+
+app.patch("/api/*", (req, res, next) => {
+  if (currentCollection) {
+    let db = req["client"].db(DB_NAME) as mongodb.Db;
+    let collection = db.collection(currentCollection);
+    const oId = new mongodb.ObjectId(id);
+    collection
+      .updateOne({ _id: oId }, { $set: req["body"] })
+      .then((data) => res.send(data))
+      .catch((err) => res.status(503).send("QUERY: Syntax error"))
+      .finally(() => req["client"].close());
+  }
+});
+
+app.put("/api/*", (req, res, next) => {
+  if (currentCollection) {
+    let db = req["client"].db(DB_NAME) as mongodb.Db;
+    let collection = db.collection(currentCollection);
+    const oId = new mongodb.ObjectId(id);
+    collection
+      .replaceOne({ _id: oId }, req["body"])
+      .then((data) => res.send(data))
+      .catch((err) => res.status(503).send("QUERY: Syntax error"))
+      .finally(() => req["client"].close());
+  }
+});
+
+/*  **************
+    default route e route di gestione degli errori
+    ************** */
+app.use("/", (err, req, res, next) => {
+  console.log("** ERRORE SERVER *** " + err); //  da correggere
 });
