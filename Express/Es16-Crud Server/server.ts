@@ -11,11 +11,13 @@ import cors from "cors";
 const mongoClient = mongodb.MongoClient;
 // const CONNECTION_STRING = "mongodb://127.0.0.1:27017";
 const CONNECTION_STRING =
+  process.env.MONGODB_URI ||
   "mongodb+srv://admin:admin@cluster0.niwz6.mongodb.net/5B?retryWrites=true&w=majority";
+/*"mongodb+srv://admin:admin@cluster0.niwz6.mongodb.net/5B?retryWrites=true&w=majority";*/
 const DB_NAME = "recipeBook";
 //#endregion
 
-const PORT: number = 1337;
+const PORT: number = parseInt(process.env.PORT) || 1337;
 const app = express();
 
 const server = http.createServer(app);
@@ -33,9 +35,9 @@ function init() {
   });
 }
 
-/*  **************
+/*  ******************************************
     //  elenco delle routes middleware
-    ************** */
+    ****************************************** */
 
 //  1. Log
 app.use("/", (req, res, next) => {
@@ -68,8 +70,12 @@ app.use("/", (req, res, next) => {
   });
 });
 
-// 6. Middleware cors
-const whitelist = ["http://localhost:4200", "http://localhost:1337"];
+//  6. Middleware cors
+const whitelist = [
+  "http://localhost:4200",
+  "http://localhost:1337",
+  "https://detoffolsamuele-crudserver.herokuapp.com",
+];
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
@@ -84,9 +90,9 @@ const corsOptions = {
 };
 app.use("/", cors(corsOptions));
 
-/*  **************
+/*  ******************************************
     elenco delle routes di risposta al client
-    ************** */
+    ****************************************** */
 
 //  middleware di intercettazione dei parametri
 let currentCollection: string = "";
@@ -187,9 +193,9 @@ app.put("/api/*", (req, res, next) => {
   }
 });
 
-/*  **************
+/*  ******************************************
     default route e route di gestione degli errori
-    ************** */
+    ****************************************** */
 app.use("/", (err, req, res, next) => {
-  console.log("** ERRORE SERVER *** " + err); //  da correggere
+  console.log("**** ERRORE SERVER ***** " + err); //  da correggere
 });
