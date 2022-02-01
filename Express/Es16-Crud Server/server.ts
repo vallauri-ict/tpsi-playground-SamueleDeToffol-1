@@ -75,6 +75,7 @@ const whitelist = [
   "http://localhost:4200",
   "http://localhost:1337",
   "https://detoffolsamuele-crudserver.herokuapp.com",
+  "http://detoffolsamuele-crudserver.herokuapp.com"
 ];
 const corsOptions = {
   origin: function (origin, callback) {
