@@ -81,7 +81,7 @@ $(document).ready(function() {
 	reader.readAsDataURL(file) 
 	reader.onload = function(){	
 		let rq = inviaRichiesta("POST", "/api/cloudinary", 
-						{"username":txtUser.val(), "img":reader.result})
+						{"username":txtUser.val(), "image":reader.result})
 		rq.fail(errore)
 		rq.done(function(data){
 			alert("upload eseguito correttamente")

@@ -6,15 +6,17 @@ import express from "express";
 import * as mongodb from "mongodb";
 import cors from "cors";
 import fileUpload, { UploadedFile } from "express-fileupload";
+import ENVIRONMENT from "./environment.json";
+import cloudinary from "cloudinary";
 //#endregion
-
+cloudinary.v2.config({
+  cloud_name: ENVIRONMENT.CLOUDINARY.CLOUD_NAME,
+  api_key: ENVIRONMENT.CLOUDINARY.API_KEY,
+  api_secret: ENVIRONMENT.CLOUDINARY.API_SECRET,
+});
 //#region mongoDB
 const mongoClient = mongodb.MongoClient;
 // const CONNECTION_STRING = "mongodb://127.0.0.1:27017";
-const CONNECTION_STRING =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://admin:admin@cluster0.niwz6.mongodb.net/5B?retryWrites=true&w=majority";
-/*"mongodb+srv://admin:admin@cluster0.niwz6.mongodb.net/5B?retryWrites=true&w=majority";*/
 const DB_NAME = "5B";
 //#endregion
 
@@ -49,9 +51,9 @@ app.use("/", (req, res, next) => {
 //  2. Static route
 app.use("/", express.static("./static")); //  next fa in automatico
 
-//  3. Route lettura paramentri post
-app.use("/", bodyParser.json());
-app.use("/", bodyParser.urlencoded({ extended: true }));
+//  3. Route lettura paramentri post con impostazione del limite per le immagini in base 64
+app.use("/", bodyParser.json({"limit":"10mb"}));
+app.use("/", bodyParser.urlencoded({ extended: true , "limit":"10mb"}));
 
 //  4. Log dei parametri
 app.use("/", (req, res, next) => {
@@ -62,7 +64,7 @@ app.use("/", (req, res, next) => {
 
 //  5. Connessione al DB
 app.use("/", (req, res, next) => {
-  mongoClient.connect(CONNECTION_STRING, (err, client) => {
+  mongoClient.connect(process.env.MONGODB_URI || ENVIRONMENT.CONNECTION_STRING, (err, client) => {
     if (err) res.status(503).send("DB connection error");
     else {
       req["client"] = client;
@@ -95,7 +97,7 @@ app.use("/", cors(corsOptions) as any);
 // 7. File Upload
 app.use(
   fileUpload({
-    limits: { fileSize: 10 * 1024 * 1024 },
+    limits: { "fileSize": (10 * 1024 * 1024) }
   })
 );
 
@@ -157,9 +159,18 @@ app.get("/api/uploadBase64", (req, res, next) => {
     .finally(() => req["client"].close());
 });
 
+app.post("/api/cloudinaryBinario", (req, res, next) => {
+  
+});
+
 /*  ******************************************
-    default route e route di gestione degli errori
+  default route e route di gestione degli errori
     ****************************************** */
+
+app.use("/", (req,res,next)=>{
+  res.status(404);
+  res.send("Risorsa non trovata");
+})
 
 app.use("/", (err, req, res, next) => {
   console.log("**** ERRORE SERVER ***** " + err); //  da correggere
